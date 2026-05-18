@@ -7,7 +7,7 @@ let firebaseConfigLocal: any = {};
 try {
   // We use this to satisfy local development if the file exists
   // The real production values come from Environment Variables
-  const config = await import('../firebase-applet-config.json');
+  const config = await import(/* @vite-ignore */ '../firebase-applet-config.json');
   firebaseConfigLocal = config.default || config;
 } catch (e) {
   // File might be missing on Netlify (which is fine!)
