@@ -91,7 +91,7 @@ export default function MovieDetail({ movie, onClose }: MovieDetailProps) {
             <div className="mb-8">
               <h3 className="text-[10px] tracking-[0.25em] text-[#7a6255] uppercase mb-1 font-body">Genre</h3>
               <p className="font-display italic text-brand-copper text-lg md:text-xl relative z-10">
-                {movie.description?.split('·')[0] || movie.description || 'Cinema'}
+                {movie.genre || 'Cinema'}
               </p>
             </div>
 

@@ -9,6 +9,7 @@ export interface Movie {
   addedBy: string;
   isShared: boolean;
   imageUrl?: string;
+  genre?: string;
   description?: string;
   likedBy?: string[];
   createdAt?: any;
@@ -41,7 +42,8 @@ export async function addMovie(title: string, year: number, userId: string, genr
       addedBy: userId,
       isShared: true,
       imageUrl: String(imageUrl).substring(0, 2400),
-      description: genre, // using genre as description for now
+      genre: genre,
+      description: "", 
       likedBy: [],
       createdAt: serverTimestamp()
     });
@@ -67,6 +69,7 @@ export async function addCustomMovie(data: {
       addedBy: data.userId,
       isShared: true,
       imageUrl: data.imageUrl ? String(data.imageUrl).substring(0, 2400) : "",
+      genre: data.genre || "Cinema",
       description: data.description ? String(data.description).substring(0, 1990) : "",
       likedBy: [],
       createdAt: serverTimestamp()
