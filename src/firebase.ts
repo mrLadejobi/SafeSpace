@@ -3,16 +3,10 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 // Fallback config for local development
-let firebaseConfigLocal: any = {};
-try {
-  // We use this to satisfy local development if the file exists
-  // The real production values come from Environment Variables
-  const config = await import(/* @vite-ignore */ '../firebase-applet-config.json');
-  firebaseConfigLocal = config.default || config;
-} catch (e) {
-  // File might be missing on Netlify (which is fine!)
-  console.log('No local firebase config found, using environment variables.');
-}
+// We use import.meta.glob for a safe optional import that won't fail the build if the file is missing
+const configs = import.meta.glob('../firebase-applet-config.json', { eager: true });
+const localConfig: any = configs['../firebase-applet-config.json'] || {};
+const firebaseConfigLocal = localConfig.default || localConfig;
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || firebaseConfigLocal.apiKey,
