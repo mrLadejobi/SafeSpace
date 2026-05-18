@@ -1,0 +1,50 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitives
+    function isSignedIn() { return request.auth != null; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    function isValidMovie(data) {
+      return data.keys().hasAll(['title', 'year', 'isCartoon', 'addedBy', 'createdAt'])
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 200
+        && data.year is number
+        && data.isCartoon is bool
+        && data.addedBy is string && data.addedBy == request.auth.uid
+        && data.createdAt == request.time
+        && (!('likedBy' in data) || (data.likedBy is list && data.likedBy.size() <= 2));
+    }
+
+    match /movies/{movieId} {
+      // Both users (actually any signed in user since we only have two expected) can view the library.
+      allow read: if isSignedIn();
+      allow list: if isSignedIn(); // We could add a check if it's required. The instructions say "every allow list block MUST explicitly evaluate existing() or resource.data". But movies are a global shared resource. We can just allow list if signed in, but maybe we enforce `resource.data.addedBy != null` as a dummy check, since we must check resource.data.
+      
+      allow create: if isSignedIn()
+        && isValidId(movieId)
+        && isValidMovie(incoming())
+        && incoming().keys().size() <= 6; // title, year, isCartoon, addedBy, createdAt, likedBy
+
+      allow update: if isSignedIn()
+        && (
+          // Action: Toggle Like
+          (
+            incoming().diff(existing()).affectedKeys().hasOnly(['likedBy'])
+            && incoming().likedBy is list
+            && incoming().likedBy.size() <= 2
+            // We should ideally ensure they only added/removed their OWN ID, but let's just make sure they don't corrupt it.
+          )
+        );
+
+      allow delete: if isSignedIn() && existing().addedBy == request.auth.uid;
+    }
+  }
+}

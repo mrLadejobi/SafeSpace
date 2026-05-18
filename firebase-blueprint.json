@@ -1,0 +1,27 @@
+{
+  "entities": {
+    "Movie": {
+      "title": "Movie",
+      "description": "A movie in the shared library",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "year": { "type": "number" },
+        "isCartoon": { "type": "boolean" },
+        "likedBy": {
+          "type": "array",
+          "description": "List of user IDs who liked this movie"
+        },
+        "addedBy": { "type": "string", "description": "User ID who added the movie" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "year", "isCartoon", "addedBy", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/movies/{movieId}": {
+      "schema": { "$ref": "#/entities/Movie" },
+      "description": "Collection of movies added to the vault"
+    }
+  }
+}
